@@ -4,7 +4,7 @@ import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
 
 const TransactionForm = () => {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction, importTransactions } = useContext(AppContext);
+  const { transactions, addTransaction, updateTransaction, deleteTransaction, importTransactions, categories } = useContext(AppContext);
   const [type, setType] = useState("income");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
@@ -66,13 +66,11 @@ const TransactionForm = () => {
           <option value="expense">Расход</option>
         </select>
         <label htmlFor="category">Категория:</label>
-        <input
-          id="category"
-          name="category"
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
+        <select id="category" name="category" value={category} onChange={(e) => setCategory(e.target.value)}>
+          {categories.map((c) => (
+            <option key={c.id} value={c.category}>{c.category}</option>
+          ))}
+        </select>
         <label htmlFor="amount">Сумма:</label>
         <input
           id="amount"
