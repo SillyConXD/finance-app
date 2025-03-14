@@ -145,7 +145,8 @@ export const AppProvider = ({ children }) => {
       categories, 
       addCategory, 
       updateCategory, 
-      deleteCategory 
+      deleteCategory,
+      setCategories // Добавим setCategories в контекст
     }}>
       {children}
     </AppContext.Provider>
