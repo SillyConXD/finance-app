@@ -1,0 +1,43 @@
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 60px;
+  bottom: 60px;
+  width: 250px;
+  background: #2d2d2d;
+  transition: 0.3s;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+}
+
+.sidebar nav a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px;
+  transition: 0.2s;
+}
+
+.sidebar nav a:hover {
+  background: #3d3d3d;
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    left: 0;
+  }
+  
+  .main-content {
+    margin-left: 250px;
+  }
+}
