@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Reminders = () => {
   const [reminders, setReminders] = useState([]);
@@ -8,13 +10,19 @@ const Reminders = () => {
   const [date, setDate] = useState('');
 
   const addReminder = () => {
+    if (!reminder || !date) {
+      toast.error("Все поля должны быть заполнены");
+      return;
+    }
     setReminders([...reminders, { reminder, date }]);
     setReminder('');
     setDate('');
+    toast.success("Напоминание добавлено");
   };
 
   return (
     <div className="form-container">
+      <ToastContainer />
       <h2>Напоминания</h2>
       <label htmlFor="reminder">Напоминание:</label>
       <input id="reminder" name="reminder" type="text" value={reminder} onChange={(e) => setReminder(e.target.value)} placeholder="Напоминание" />
