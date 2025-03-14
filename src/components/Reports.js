@@ -5,7 +5,7 @@ import './Form.css'; // Импортируем стили для форм
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Reports = ({ transactions }) => {
+const Reports = () => {
   const [payments, setPayments] = useState([]);
   const [payment, setPayment] = useState({ type: '', category: '', amount: '', date: '', repeat: false });
   const [editId, setEditId] = useState(null);
