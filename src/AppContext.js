@@ -8,6 +8,8 @@ export const AppProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
   const [goals, setGoals] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [reminders, setReminders] = useState([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -37,9 +39,29 @@ export const AppProvider = ({ children }) => {
       }
     };
 
+    const fetchPayments = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/payments");
+        setPayments(response.data);
+      } catch (err) {
+        console.error("Error fetching payments:", err);
+      }
+    };
+
+    const fetchReminders = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/reminders");
+        setReminders(response.data);
+      } catch (err) {
+        console.error("Error fetching reminders:", err);
+      }
+    };
+
     fetchTransactions();
     fetchGoals();
     fetchCategories();
+    fetchPayments();
+    fetchReminders();
   }, []);
 
   const addTransaction = async (transaction) => {
@@ -131,6 +153,51 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const addPayment = async (payment) => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/payments", payment);
+      setPayments([...payments, response.data]);
+    } catch (err) {
+      console.error("Error adding payment:", err);
+    }
+  };
+
+  const updatePayment = async (id, updatedPayment) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/payments/${id}`, updatedPayment);
+      setPayments(payments.map(p => p.id === id ? response.data : p));
+    } catch (err) {
+      console.error("Error updating payment:", err);
+    }
+  };
+
+  const deletePayment = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/payments/${id}`);
+      setPayments(payments.filter(p => p.id !== id));
+    } catch (err) {
+      console.error("Error deleting payment:", err);
+    }
+  };
+
+  const addReminder = async (reminder) => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/reminders", reminder);
+      setReminders([...reminders, response.data]);
+    } catch (err) {
+      console.error("Error adding reminder:", err);
+    }
+  };
+
+  const deleteReminder = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/reminders/${id}`);
+      setReminders(reminders.filter(r => r.id !== id));
+    } catch (err) {
+      console.error("Error deleting reminder:", err);
+    }
+  };
+
   return (
     <AppContext.Provider value={{ 
       transactions, 
@@ -146,7 +213,16 @@ export const AppProvider = ({ children }) => {
       addCategory, 
       updateCategory, 
       deleteCategory,
-      setCategories // Добавим setCategories в контекст
+      setCategories, // Добавим setCategories в контекст
+      payments, 
+      addPayment, 
+      updatePayment, 
+      deletePayment, 
+      setPayments, // Добавим setPayments в контекст
+      reminders, 
+      addReminder, 
+      deleteReminder, 
+      setReminders // Добавим setReminders в контекст
     }}>
       {children}
     </AppContext.Provider>

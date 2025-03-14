@@ -1,116 +1,146 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import './Reports.css'; // Импортируем стили для компонента Reports
+import { AppContext } from '../AppContext'; // Добавим импорт AppContext
+import Modal from 'react-modal'; // Импортируем библиотеку для модальных окон
+import axios from 'axios'; // Импортируем axios для работы с API
+
+Modal.setAppElement('#root'); // Установим элемент для модального окна
 
 const Reports = () => {
-  const [payments, setPayments] = useState([]);
-  const [payment, setPayment] = useState({ type: '', category: '', amount: '', date: '', repeat: false });
-  const [editId, setEditId] = useState(null);
+  const { transactions } = useContext(AppContext);
+  const [currentMonth, setCurrentMonth] = useState('');
+  const [previousMonth, setPreviousMonth] = useState('');
+  const [reportData, setReportData] = useState(null);
+  const [comparisonData, setComparisonData] = useState(null);
+  const [emptyPeriodReport, setEmptyPeriodReport] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [chatGPTResponse, setChatGPTResponse] = useState('');
 
   useEffect(() => {
-    // Загрузка платежей из локального хранилища
-    const storedPayments = JSON.parse(localStorage.getItem('payments')) || [];
-    setPayments(storedPayments);
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const previousMonth = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
+    setCurrentMonth(currentMonth);
+    setPreviousMonth(previousMonth);
   }, []);
 
   useEffect(() => {
-    // Сохранение платежей в локальное хранилище
-    localStorage.setItem('payments', JSON.stringify(payments));
-  }, [payments]);
-
-  const handleAddPayment = () => {
-    if (!payment.category || !payment.amount || !payment.date) {
-      toast.error("Все поля должны быть заполнены");
-      return;
+    if (currentMonth) {
+      generateMonthlyReport(currentMonth);
     }
-    if (payment.amount <= 0) {
-      toast.error("Сумма должна быть положительным числом");
-      return;
+    if (previousMonth) {
+      generateComparisonReport(currentMonth, previousMonth);
     }
-    const newPayment = { ...payment, id: Date.now(), completed: false };
-    setPayments([...payments, newPayment]);
-    setPayment({ type: '', category: '', amount: '', date: '', repeat: false });
-    toast.success("Платеж добавлен");
+  }, [currentMonth, previousMonth, transactions]);
+
+  const generateMonthlyReport = (month) => {
+    const filteredTransactions = transactions.filter(t => t.date.startsWith(month));
+    const income = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const expense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    setReportData({ income, expense });
   };
 
-  const handleEditPayment = (id) => {
-    const paymentToEdit = payments.find(p => p.id === id);
-    setPayment(paymentToEdit);
-    setEditId(id);
+  const generateComparisonReport = (currentMonth, previousMonth) => {
+    const currentTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+    const previousTransactions = transactions.filter(t => t.date.startsWith(previousMonth));
+
+    const currentIncome = currentTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const currentExpense = currentTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+    const previousIncome = previousTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const previousExpense = previousTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+    setComparisonData({
+      current: { income: currentIncome, expense: currentExpense },
+      previous: { income: previousIncome, expense: previousExpense }
+    });
   };
 
-  const handleUpdatePayment = () => {
-    const updatedPayments = payments.map(p => p.id === editId ? payment : p);
-    setPayments(updatedPayments);
-    setPayment({ type: '', category: '', amount: '', date: '', repeat: false });
-    setEditId(null);
-    toast.success("Платеж обновлен");
+  const generateEmptyPeriodReport = () => {
+    const emptyPeriodTransactions = transactions.filter(t => !t.date);
+    const income = emptyPeriodTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const expense = emptyPeriodTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    setEmptyPeriodReport({ income, expense });
   };
 
-  const handleDeletePayment = (id) => {
-    const updatedPayments = payments.filter(p => p.id !== id);
-    setPayments(updatedPayments);
-    toast.success("Платеж удален");
+  const openModal = async () => {
+    setModalIsOpen(true);
+    try {
+      const response = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
+        prompt: `Analyze the following financial report data and provide comments and advice:\n\nIncome: ${reportData?.income}\nExpense: ${reportData?.expense}\nComparison with previous month:\nCurrent Income: ${comparisonData?.current?.income}\nCurrent Expense: ${comparisonData?.current?.expense}\nPrevious Income: ${comparisonData?.previous?.income}\nPrevious Expense: ${comparisonData?.previous?.expense}`,
+        max_tokens: 150,
+        n: 1,
+        stop: null,
+        temperature: 0.7,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer YOUR_OPENAI_API_KEY`
+        }
+      });
+      setChatGPTResponse(response.data.choices[0].text);
+    } catch (error) {
+      console.error('Error fetching data from ChatGPT:', error);
+      setChatGPTResponse('Ошибка при получении данных от ChatGPT.');
+    }
   };
 
-  const handleCompletePayment = (id) => {
-    const updatedPayments = payments.map(p => p.id === id ? { ...p, completed: true } : p);
-    setPayments(updatedPayments);
-    toast.success("Платеж отмечен как выполненный");
+  const closeModal = () => {
+    setModalIsOpen(false);
   };
 
   return (
-    <div className="form-container">
-      <ToastContainer />
-      <h2>Платежи</h2>
-      <label htmlFor="type">Тип:</label>
-      <select id="type" name="type" value={payment.type} onChange={(e) => setPayment({ ...payment, type: e.target.value })}>
-        <option value="income">Доход</option>
-        <option value="expense">Расход</option>
-      </select>
-      <label htmlFor="category">Категория:</label>
-      <input
-        id="category"
-        name="category"
-        type="text"
-        value={payment.category}
-        onChange={(e) => setPayment({ ...payment, category: e.target.value })}
-      />
-      <label htmlFor="amount">Сумма:</label>
-      <input
-        id="amount"
-        name="amount"
-        type="number"
-        value={payment.amount}
-        onChange={(e) => setPayment({ ...payment, amount: e.target.value })}
-      />
-      <label htmlFor="date">Дата:</label>
-      <input id="date" name="date" type="date" value={payment.date} onChange={(e) => setPayment({ ...payment, date: e.target.value })} />
-      <label>
-        <input
-          type="checkbox"
-          checked={payment.repeat}
-          onChange={(e) => setPayment({ ...payment, repeat: e.target.checked })}
-        />
-        Повторяющийся платеж
-      </label>
-      <button className="button-50" onClick={editId ? handleUpdatePayment : handleAddPayment}>
-        {editId ? "Обновить платеж" : "Добавить платеж"}
-      </button>
-      <h3>Список платежей</h3>
-      <ul>
-        {payments.map((p) => (
-          <li key={p.id}>
-            {p.date} - {p.category} - {p.amount} - {p.type} - {p.repeat ? "Повторяющийся" : "Однократный"} - {p.completed ? "Выполнен" : "Не выполнен"}
-            <button className="button-50" onClick={() => handleEditPayment(p.id)}>Редактировать</button>
-            <button className="button-50" onClick={() => handleDeletePayment(p.id)}>Удалить</button>
-            {!p.completed && <button className="button-50" onClick={() => handleCompletePayment(p.id)}>Отметить как выполненный</button>}
-          </li>
-        ))}
-      </ul>
+    <div className="reports-container" style={{ zIndex: 2 }}>
+      <h2>Отчеты</h2>
+      <div>
+        <h3>Отчет за текущий месяц ({currentMonth})</h3>
+        {reportData ? (
+          <div>
+            <p>Доходы: {reportData.income}</p>
+            <p>Расходы: {reportData.expense}</p>
+          </div>
+        ) : (
+          <p>Нет данных за текущий месяц</p>
+        )}
+      </div>
+      <div>
+        <h3>Сравнение с предыдущим месяцем ({previousMonth})</h3>
+        {comparisonData ? (
+          <div>
+            <p>Доходы текущего месяца: {comparisonData.current.income}</p>
+            <p>Расходы текущего месяца: {comparisonData.current.expense}</p>
+            <p>Доходы предыдущего месяца: {comparisonData.previous.income}</p>
+            <p>Расходы предыдущего месяца: {comparisonData.previous.expense}</p>
+          </div>
+        ) : (
+          <p>Нет данных для сравнения</p>
+        )}
+      </div>
+      <div>
+        <h3>Отчет за пустой период</h3>
+        <button className="button-50" onClick={generateEmptyPeriodReport} style={{ zIndex: 2 }}>Сгенерировать отчет</button>
+        {emptyPeriodReport && (
+          <div>
+            <p>Доходы: {emptyPeriodReport.income}</p>
+            <p>Расходы: {emptyPeriodReport.expense}</p>
+          </div>
+        )}
+      </div>
+      <button className="button-50" onClick={openModal} style={{ zIndex: 2 }}>Сгенерировать отчет</button>
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="ChatGPT Report"
+        className="Modal"
+        overlayClassName="Overlay"
+      >
+        <h2>Отчет от ChatGPT</h2>
+        <p>{chatGPTResponse}</p>
+        <button className="button-50" onClick={closeModal} style={{ zIndex: 2 }}>Закрыть</button>
+      </Modal>
     </div>
   );
 };

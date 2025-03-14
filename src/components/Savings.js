@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import './Savings.css'; // Импортируем стили для компонента Savings
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -19,12 +20,12 @@ const Savings = () => {
   };
 
   return (
-    <div className="form-container">
+    <div className="savings-container" style={{ zIndex: 2 }}>
       <ToastContainer />
       <h2>Резервный фонд</h2>
       <label htmlFor="percentage">Процент от дохода:</label>
-      <input id="percentage" name="percentage" type="number" value={percentage} onChange={(e) => setPercentage(e.target.value)} placeholder="Процент от дохода" />
-      <button className="button-50" onClick={() => addSavings(1000)}>Добавить 1000 дохода</button> {/* Пример добавления дохода */}
+      <input id="percentage" name="percentage" type="number" value={percentage} onChange={(e) => setPercentage(e.target.value)} placeholder="Процент от дохода" style={{ zIndex: 2 }} />
+      <button className="button-50" onClick={() => addSavings(1000)} style={{ zIndex: 2 }}>Добавить 1000 дохода</button> {/* Пример добавления дохода */}
       <p>Текущий резервный фонд: {savings}</p>
     </div>
   );

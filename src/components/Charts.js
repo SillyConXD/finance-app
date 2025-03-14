@@ -3,6 +3,7 @@ import { PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { AppContext } from "../AppContext";
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import './Charts.css'; // Импортируем стили для компонента Charts
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -85,41 +86,41 @@ const Charts = () => {
   };
 
   return (
-    <div className="form-container">
+    <div className="charts-container" style={{ zIndex: 2 }}>
       <ToastContainer />
       <h4>Добавить транзакцию</h4>
-      <div>
+      <div style={{ zIndex: 2 }}>
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <label>
+        <label style={{ zIndex: 2 }}>
           Тип:
-          <select value={type} onChange={(e) => setType(e.target.value)}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={{ zIndex: 2 }}>
             <option value="income">Доход</option>
             <option value="expense">Расход</option>
           </select>
         </label>
-        <label>
+        <label style={{ zIndex: 2 }}>
           Категория:
-          <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} />
+          <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} style={{ zIndex: 2 }} />
         </label>
-        <label>
+        <label style={{ zIndex: 2 }}>
           Сумма:
-          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ zIndex: 2 }} />
         </label>
-        <label>
+        <label style={{ zIndex: 2 }}>
           Дата:
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ zIndex: 2 }} />
         </label>
-        <button className="button-50" onClick={handleAddTransaction}>{editId ? "Обновить транзакцию" : "Добавить транзакцию"}</button>
+        <button className="button-50" onClick={handleAddTransaction} style={{ zIndex: 2 }}>{editId ? "Обновить транзакцию" : "Добавить транзакцию"}</button>
       </div>
 
-      <div>
+      <div style={{ zIndex: 2 }}>
         <h4>Круговая диаграмма расходов</h4>
         <PieChart width={400} height={400}>
           <Pie data={expenseData} dataKey="amount" nameKey="category" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label />
         </PieChart>
       </div>
 
-      <div>
+      <div style={{ zIndex: 2 }}>
         <h4>Линейный график доходов и расходов</h4>
         <LineChart width={600} height={300} data={monthlyData}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -132,14 +133,14 @@ const Charts = () => {
         </LineChart>
       </div>
 
-      <div>
+      <div style={{ zIndex: 2 }}>
         <h4>Список транзакций</h4>
-        <ul style={{ textAlign: "center" }}>
+        <ul style={{ textAlign: "center", zIndex: 2 }}>
           {transactions.map((transaction) => (
             <li key={transaction.id}>
               {transaction.date} - {transaction.category} - {transaction.amount} - {transaction.type}
-              <button className="button-50" onClick={() => handleEdit(transaction)}>Редактировать</button>
-              <button className="button-50" onClick={() => handleDelete(transaction.id)}>Удалить</button>
+              <button className="button-50" onClick={() => handleEdit(transaction)} style={{ zIndex: 2 }}>Редактировать</button>
+              <button className="button-50" onClick={() => handleDelete(transaction.id)} style={{ zIndex: 2 }}>Удалить</button>
             </li>
           ))}
         </ul>

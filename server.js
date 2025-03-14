@@ -43,6 +43,24 @@ const createTables = async () => {
         category_limit NUMERIC
       );
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id SERIAL PRIMARY KEY,
+        type VARCHAR(50),
+        category VARCHAR(50),
+        amount NUMERIC,
+        date DATE,
+        repeat BOOLEAN,
+        completed BOOLEAN DEFAULT FALSE
+      );
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id SERIAL PRIMARY KEY,
+        reminder VARCHAR(255),
+        date DATE
+      );
+    `);
     console.log("Tables created successfully");
   } catch (err) {
     console.error("Error creating tables", err);
@@ -211,6 +229,93 @@ app.delete("/api/categories/:id", async (req, res) => {
     res.json({ message: "Category deleted" });
   } catch (err) {
     console.error("Error deleting category:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// CRUD операции для платежей
+app.post("/api/payments", async (req, res) => {
+  const { type, category, amount, date, repeat } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO payments (type, category, amount, date, repeat) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [type, category, amount, date, repeat]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error inserting payment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/payments", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM payments");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching payments:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.put("/api/payments/:id", async (req, res) => {
+  const { id } = req.params;
+  const { type, category, amount, date, repeat, completed } = req.body;
+  try {
+    const result = await pool.query(
+      "UPDATE payments SET type = $1, category = $2, amount = $3, date = $4, repeat = $5, completed = $6 WHERE id = $7 RETURNING *",
+      [type, category, amount, date, repeat, completed, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating payment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/api/payments/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM payments WHERE id = $1", [id]);
+    res.json({ message: "Payment deleted" });
+  } catch (err) {
+    console.error("Error deleting payment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// CRUD операции для напоминаний
+app.post("/api/reminders", async (req, res) => {
+  const { reminder, date } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO reminders (reminder, date) VALUES ($1, $2) RETURNING *",
+      [reminder, date]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error inserting reminder:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/reminders", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM reminders");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching reminders:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/api/reminders/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM reminders WHERE id = $1", [id]);
+    res.json({ message: "Reminder deleted" });
+  } catch (err) {
+    console.error("Error deleting reminder:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

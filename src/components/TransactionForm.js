@@ -65,7 +65,7 @@ const TransactionForm = () => {
     <div className="form-container">
       <ToastContainer />
       <h4>Добавить транзакцию</h4>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ zIndex: 2 }}>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <label htmlFor="type">Тип:</label>
         <select id="type" name="type" value={type} onChange={(e) => setType(e.target.value)}>
@@ -88,16 +88,16 @@ const TransactionForm = () => {
         />
         <label htmlFor="date">Дата:</label>
         <input id="date" name="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        <button className="button-50" type="submit">{editId ? "Обновить транзакцию" : "Добавить транзакцию"}</button>
-        <button className="button-50" type="button" onClick={importTransactions}>Импортировать транзакции</button>
+        <button className="button-50" type="submit" style={{ zIndex: 1 }}>{editId ? "Обновить транзакцию" : "Добавить транзакцию"}</button>
+        <button className="button-50" type="button" onClick={importTransactions} style={{ zIndex: 1 }}>Импортировать транзакции</button>
       </form>
       <h4>Список транзакций</h4>
-      <ul>
+      <ul style={{ zIndex: 2 }}>
         {transactions.map((transaction) => (
           <li key={transaction.id}>
             {transaction.date} - {transaction.category} - {transaction.amount} - {transaction.type}
-            <button className="button-50" onClick={() => handleEdit(transaction)}>Редактировать</button>
-            <button className="button-50" onClick={() => handleDelete(transaction.id)}>Удалить</button>
+            <button className="button-50" onClick={() => handleEdit(transaction)} style={{ zIndex: 2 }}>Редактировать</button>
+            <button className="button-50" onClick={() => handleDelete(transaction.id)} style={{ zIndex: 2 }}>Удалить</button>
           </li>
         ))}
       </ul>

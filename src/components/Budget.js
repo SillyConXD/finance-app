@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../AppContext';
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import './Budget.css'; // Импортируем стили для компонента Budget
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -96,35 +97,35 @@ const Budget = () => {
   };
 
   return (
-    <div className="form-container">
+    <div className="budget-container" style={{ zIndex: 2 }}>
       <ToastContainer />
       <h2>Бюджет</h2>
       <label htmlFor="category">Категория:</label>
-      <input id="category" name="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Категория" />
+      <input id="category" name="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Категория" style={{ zIndex: 2 }} />
       <label htmlFor="limit">Лимит:</label>
-      <input id="limit" name="limit" type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Лимит" />
-      <button className="button-50" onClick={handleAddCategory}>{editCategoryId ? "Обновить категорию" : "Добавить категорию"}</button>
-      <ul>
+      <input id="limit" name="limit" type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Лимит" style={{ zIndex: 2 }} />
+      <button className="button-50" onClick={handleAddCategory} style={{ zIndex: 2 }}>{editCategoryId ? "Обновить категорию" : "Добавить категорию"}</button>
+      <ul style={{ zIndex: 2 }}>
         {categories.map((c) => (
           <li key={c.id}>
             {c.category}: {c.category_limit}
-            <button className="button-50" onClick={() => handleEditCategory(c)}>Редактировать</button>
-            <button className="button-50" onClick={() => handleDeleteCategory(c.id)}>Удалить</button>
+            <button className="button-50" onClick={() => handleEditCategory(c)} style={{ zIndex: 2 }}>Редактировать</button>
+            <button className="button-50" onClick={() => handleDeleteCategory(c.id)} style={{ zIndex: 2 }}>Удалить</button>
           </li>
         ))}
       </ul>
       <h2>Цели</h2>
       <label htmlFor="goal">Цель:</label>
-      <input id="goal" name="goal" type="text" value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Цель" />
+      <input id="goal" name="goal" type="text" value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Цель" style={{ zIndex: 2 }} />
       <label htmlFor="amount">Сумма:</label>
-      <input id="amount" name="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Сумма" />
-      <button className="button-50" onClick={handleAddGoal}>{editGoalId ? "Обновить цель" : "Добавить цель"}</button>
-      <ul>
+      <input id="amount" name="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Сумма" style={{ zIndex: 2 }} />
+      <button className="button-50" onClick={handleAddGoal} style={{ zIndex: 2 }}>{editGoalId ? "Обновить цель" : "Добавить цель"}</button>
+      <ul style={{ zIndex: 2 }}>
         {goals.map((g) => (
           <li key={g.id}>
             {g.goal}: {g.amount}
-            <button className="button-50" onClick={() => handleEditGoal(g)}>Редактировать</button>
-            <button className="button-50" onClick={() => handleDeleteGoal(g.id)}>Удалить</button>
+            <button className="button-50" onClick={() => handleEditGoal(g)} style={{ zIndex: 2 }}>Редактировать</button>
+            <button className="button-50" onClick={() => handleDeleteGoal(g.id)} style={{ zIndex: 2 }}>Удалить</button>
           </li>
         ))}
       </ul>
