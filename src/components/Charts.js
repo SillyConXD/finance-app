@@ -3,6 +3,8 @@ import { PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { AppContext } from "../AppContext";
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Charts = () => {
   const { transactions, addTransaction, updateTransaction, deleteTransaction } = useContext(AppContext);
@@ -38,11 +40,11 @@ const Charts = () => {
 
   const handleAddTransaction = async () => {
     if (!category || !amount || !date) {
-      setError("Все поля должны быть заполнены");
+      toast.error("Все поля должны быть заполнены");
       return;
     }
     if (amount <= 0) {
-      setError("Сумма должна быть положительным числом");
+      toast.error("Сумма должна быть положительным числом");
       return;
     }
     try {
@@ -57,7 +59,9 @@ const Charts = () => {
       setAmount("");
       setDate("");
       setError("");
+      toast.success("Транзакция добавлена");
     } catch (err) {
+      toast.error("Ошибка при добавлении транзакции");
       setError("Ошибка при добавлении транзакции");
     }
   };
@@ -73,13 +77,16 @@ const Charts = () => {
   const handleDelete = async (id) => {
     try {
       await deleteTransaction(id);
+      toast.success("Транзакция удалена");
     } catch (err) {
+      toast.error("Ошибка при удалении транзакции");
       setError("Ошибка при удалении транзакции");
     }
   };
 
   return (
     <div className="form-container">
+      <ToastContainer />
       <h4>Добавить транзакцию</h4>
       <div>
         {error && <p style={{ color: "red" }}>{error}</p>}

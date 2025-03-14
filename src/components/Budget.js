@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../AppContext';
 import './Button.css'; // Импортируем стили кнопок
 import './Form.css'; // Импортируем стили для форм
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Budget = () => {
   const { 
@@ -12,7 +14,8 @@ const Budget = () => {
     goals, 
     addGoal, 
     updateGoal, 
-    deleteGoal 
+    deleteGoal,
+    setCategories // Добавим setCategories для обновления категорий
   } = useContext(AppContext);
   const [category, setCategory] = useState('');
   const [limit, setLimit] = useState('');
@@ -27,11 +30,15 @@ const Budget = () => {
         await updateCategory(editCategoryId, { category, category_limit: parseFloat(limit) });
         setEditCategoryId(null);
       } else {
-        await addCategory({ category, category_limit: parseFloat(limit) });
+        const newCategory = { category, category_limit: parseFloat(limit) };
+        await addCategory(newCategory);
+        setCategories([...categories, newCategory]); // Обновляем категории в контексте
       }
       setCategory('');
       setLimit('');
+      toast.success("Категория добавлена");
     } catch (err) {
+      toast.error("Ошибка при добавлении/редактировании категории");
       console.error("Ошибка при добавлении/редактировании категории:", err);
     }
   };
@@ -46,7 +53,10 @@ const Budget = () => {
     try {
       await deleteCategory(id);
       setEditCategoryId(null); // Сбросить состояние редактирования
+      setCategories(categories.filter(c => c.id !== id)); // Обновляем категории в контексте
+      toast.success("Категория удалена");
     } catch (err) {
+      toast.error("Ошибка при удалении категории");
       console.error("Ошибка при удалении категории:", err);
     }
   };
@@ -61,7 +71,9 @@ const Budget = () => {
       }
       setGoal('');
       setAmount('');
+      toast.success("Цель добавлена");
     } catch (err) {
+      toast.error("Ошибка при добавлении/редактировании цели");
       console.error("Ошибка при добавлении/редактировании цели:", err);
     }
   };
@@ -76,13 +88,16 @@ const Budget = () => {
     try {
       await deleteGoal(id);
       setEditGoalId(null); // Сбросить состояние редактирования
+      toast.success("Цель удалена");
     } catch (err) {
+      toast.error("Ошибка при удалении цели");
       console.error("Ошибка при удалении цели:", err);
     }
   };
 
   return (
     <div className="form-container">
+      <ToastContainer />
       <h2>Бюджет</h2>
       <label htmlFor="category">Категория:</label>
       <input id="category" name="category" type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Категория" />

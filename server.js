@@ -203,6 +203,9 @@ app.put("/api/categories/:id", async (req, res) => {
 
 app.delete("/api/categories/:id", async (req, res) => {
   const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: "ID is required" });
+  }
   try {
     await pool.query("DELETE FROM categories WHERE id = $1", [id]);
     res.json({ message: "Category deleted" });
